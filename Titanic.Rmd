@@ -1,0 +1,64 @@
+---
+title: "Titanic"
+author: "Aarij Khawaja"
+date: '2019-03-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1) Load the data in RStudio
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+titanic_data <- read.csv('titanic_original.csv')
+df <- tbl_df(titanic_data)
+df
+```
+
+2)  Port of embarkation
+The embarked column has some missing values, which are known to correspond to passengers who actually embarked at Southampton. Find the missing values and replace them with S.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df1 <- df %>% 
+  mutate(embarked = gsub("^$", "S", df$embarked))
+#Unique set of values for embarked to make sure it doesn't include an empty string
+df1 %>% select(embarked) %>% unique()
+```
+Here are the unique values for the column 'embarked'. They do not include any blank or empty string
+
+3) Age
+Calculate the mean of the Age column and use that value to populate the missing values.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df2 <- df1 %>% mutate(age = ifelse(is.na(df1$age), mean(df1$age, na.rm=TRUE), df1$age))
+df2
+```
+
+4) Lifeboat
+Fill the empty slots in the boat column with a dummy value 'NA'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df3 <- df2 %>% 
+  mutate(boat = gsub("^$", "NA", df2$boat))
+df3
+```
+
+5) Cabin
+Create a new column has_cabin_number which has 1 if there is a cabin number, and 0 otherwise.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df4 <- df3 %>% 
+  mutate(has_cabin_number = ifelse(grepl("^$", df3$cabin), 0, 1))
+df4
+```
+
+6) Submit the project
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+write.csv(df4, "titanic_clean.csv")
+```
+
